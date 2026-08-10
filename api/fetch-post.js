@@ -1,13 +1,15 @@
 // api/fetch-post.js
 module.exports = async (req, res) => {
-    // ===== CORS HEADERS =====
+    // ===== CORS HEADERS (WAJIB) =====
+    res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-    // ===== HANDLE OPTIONS =====
+    // ===== HANDLE OPTIONS / PREFLIGHT =====
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        res.status(200).end();
+        return;
     }
 
     // ===== HANYA TERIMA POST =====
@@ -21,7 +23,7 @@ module.exports = async (req, res) => {
     try {
         const { url, username, password } = req.body;
 
-        console.log('📥 Received request:', { url, username: username ? 'present' : 'missing' });
+        console.log('📥 Received:', { url, username: username ? 'present' : 'missing' });
 
         if (!url || !username || !password) {
             return res.status(400).json({ 
@@ -42,7 +44,7 @@ module.exports = async (req, res) => {
         const cleanPassword = password.replace(/\s/g, '');
         const auth = 'Basic ' + Buffer.from(`${username}:${cleanPassword}`).toString('base64');
 
-        console.log('📤 Fetching WordPress:', apiUrl);
+        console.log('📤 Fetching:', apiUrl);
 
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -54,11 +56,10 @@ module.exports = async (req, res) => {
         });
 
         const responseText = await response.text();
-        console.log('📊 WordPress Status:', response.status);
 
         if (!response.ok) {
             return res.status(500).json({
-                error: `Gagal fetch data: ${response.status}`,
+                error: `Gagal fetch: ${response.status}`,
                 detail: responseText.substring(0, 200)
             });
         }
