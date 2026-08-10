@@ -2,9 +2,7 @@
   "name": "vercel-wp-update",
   "version": "1.0.0",
   "description": "WordPress Updater",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "build": "echo 'Build complete'"
   },
   "engines": {
