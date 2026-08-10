@@ -4,7 +4,8 @@
   "description": "WordPress Updater",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "echo 'Build complete'"
   },
   "dependencies": {
     "express": "^4.18.2"
