@@ -1,0 +1,8 @@
+{
+  "name": "vercel-wp-update",
+  "version": "1.0.0",
+  "description": "WordPress Updater",
+  "scripts": {
+    "build": "echo 'Build complete'"
+  }
+}
