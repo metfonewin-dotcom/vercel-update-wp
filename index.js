@@ -1,5 +1,11 @@
 // index.js - Entrypoint untuk Vercel
-console.log('Server running!');
 module.exports = (req, res) => {
-    res.status(200).json({ message: 'Welcome to WordPress Updater API' });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 
+        message: 'WordPress Updater API is running!',
+        endpoints: {
+            fetch: '/api/fetch-post',
+            update: '/api/update-post'
+        }
+    }));
 };
