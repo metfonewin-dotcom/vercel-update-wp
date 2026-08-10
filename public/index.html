@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; }
         .header h1 { font-size: 28px; }
         .header p { opacity: 0.8; margin-top: 5px; }
@@ -15,11 +15,11 @@
         .card h3 { color: #1a1a2e; margin-bottom: 15px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; background: #fafafa; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: border-color 0.3s; background: #fafafa; font-family: inherit; }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #4a90e2; background: white; }
-        .form-group textarea { min-height: 60px; resize: vertical; font-family: monospace; font-size: 13px; }
+        .form-group textarea { min-height: 60px; resize: vertical; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .btn-primary { background: #4a90e2; color: white; }
         .btn-primary:hover { background: #357abd; }
         .btn-success { background: #28a745; color: white; }
@@ -47,17 +47,19 @@
         .loading { display: none; color: #6c757d; margin: 10px 0; }
         .loading.active { display: block; }
         .hidden { display: none; }
-        .warning { color: #856404; background: #fff3cd; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ffc107; }
+        hr { margin: 20px 0; border: none; border-top: 2px solid #e9ecef; }
         @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } .post-item { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <div class="header">
             <h1>📝 WordPress Updater</h1>
             <p>Update judul, konten, status, Yoast SEO, kategori, dan tags</p>
         </div>
 
+        <!-- KONFIGURASI -->
         <div class="card">
             <h3>⚙️ Konfigurasi WordPress</h3>
             <div class="form-row">
@@ -76,6 +78,7 @@
             </div>
         </div>
 
+        <!-- TAMBAH POSTINGAN -->
         <div class="card">
             <h3>📝 Tambah Postingan</h3>
             <div class="form-group">
@@ -84,59 +87,65 @@
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="fetchPost()">📥 Fetch Data</button>
-                <button class="btn btn-success" onclick="addPostToList()">➕ Tambah</button>
+                <button class="btn btn-success" onclick="addPostToList()">➕ Tambah ke Daftar</button>
             </div>
             <div class="loading" id="loadingFetch">⏳ Loading...</div>
             <div class="message" id="fetchMessage"></div>
 
+            <!-- FORM EDIT (muncul setelah fetch) -->
             <div id="editForm" class="hidden" style="margin-top:20px; padding:20px; background:#f8f9fa; border-radius:8px;">
-                <h4>✏️ Edit</h4>
-                <div id="yoastWarning" class="warning hidden">⚠️ Yoast SEO tidak terdeteksi. Pastikan plugin Yoast aktif.</div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="postTitle">📝 Judul</label>
-                        <input type="text" id="postTitle" placeholder="Judul">
-                    </div>
-                    <div class="form-group">
-                        <label for="postStatus">📌 Status</label>
-                        <select id="postStatus">
-                            <option value="draft">Draft</option>
-                            <option value="publish">Publish</option>
-                        </select>
-                    </div>
-                </div>
+                <h4>✏️ Edit Artikel</h4>
+
                 <div class="form-group">
-                    <label for="postContent">📄 Konten</label>
-                    <textarea id="postContent" rows="6" placeholder="Konten HTML"></textarea>
+                    <label for="postTitle">📝 Judul Artikel</label>
+                    <input type="text" id="postTitle" placeholder="Masukkan judul artikel..." style="font-size:16px; padding:12px;">
                 </div>
+
+                <div class="form-group">
+                    <label for="postStatus">📌 Status</label>
+                    <select id="postStatus" style="font-size:16px; padding:12px;">
+                        <option value="draft">Draft</option>
+                        <option value="publish">Publish</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="postContent">📄 Konten Artikel</label>
+                    <textarea id="postContent" rows="8" placeholder="Tulis konten artikel di sini..." style="font-size:15px; padding:12px; font-family: inherit;"></textarea>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="postCategories">📂 Kategori (ID)</label>
-                        <input type="text" id="postCategories" placeholder="1,2,3">
+                        <label for="postCategories">📂 Kategori (ID, pisah koma)</label>
+                        <input type="text" id="postCategories" placeholder="Contoh: 1,2,3" style="font-size:15px; padding:12px;">
                     </div>
                     <div class="form-group">
-                        <label for="postTags">🏷️ Tags (ID)</label>
-                        <input type="text" id="postTags" placeholder="4,5,6">
+                        <label for="postTags">🏷️ Tags (ID, pisah koma)</label>
+                        <input type="text" id="postTags" placeholder="Contoh: 4,5,6" style="font-size:15px; padding:12px;">
                     </div>
                 </div>
-                <h4 style="margin-top:15px;">🔍 Yoast SEO</h4>
+
+                <hr>
+
+                <h4 style="margin-top:15px;">🔍 Yoast SEO Settings</h4>
                 <div class="form-group">
                     <label for="yoastTitle">SEO Title</label>
-                    <input type="text" id="yoastTitle" placeholder="SEO Title">
+                    <input type="text" id="yoastTitle" placeholder="Masukkan SEO title..." style="font-size:15px; padding:12px;">
                 </div>
                 <div class="form-group">
                     <label for="yoastFocuskw">Focus Keyword</label>
-                    <input type="text" id="yoastFocuskw" placeholder="Focus Keyword">
+                    <input type="text" id="yoastFocuskw" placeholder="Masukkan focus keyword..." style="font-size:15px; padding:12px;">
                 </div>
                 <div class="form-group">
                     <label for="yoastMetadesc">Meta Description</label>
-                    <textarea id="yoastMetadesc" placeholder="Meta Description"></textarea>
+                    <textarea id="yoastMetadesc" rows="3" placeholder="Masukkan meta description..." style="font-size:15px; padding:12px; font-family: inherit;"></textarea>
                 </div>
             </div>
         </div>
 
+        <!-- DAFTAR POSTINGAN -->
         <div class="card">
-            <h3>📋 Daftar <span class="count-badge" id="postCount">0</span></h3>
+            <h3>📋 Daftar Postingan <span class="count-badge" id="postCount">0</span></h3>
             <div class="btn-group">
                 <button class="btn btn-success" onclick="updateAll()">🚀 Update All</button>
                 <button class="btn btn-danger" onclick="clearAllPosts()">🗑️ Hapus Semua</button>
@@ -216,39 +225,24 @@
             editForm.classList.add('hidden');
 
             try {
-                console.log('📤 Sending to /api/fetch-post');
-                console.log('URL:', editUrl);
-
                 const response = await fetch('/api/fetch-post', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: editUrl, username, password: appPassword })
                 });
 
-                console.log('📊 Response status:', response.status);
-
                 if (!response.ok) {
                     const text = await response.text();
-                    let errorMsg = `Server error: ${response.status}`;
-                    try {
-                        const json = JSON.parse(text);
-                        if (json.error) errorMsg = json.error;
-                        if (json.detail) errorMsg += ' - ' + json.detail;
-                    } catch (e) {
-                        errorMsg += ' - ' + text.substring(0, 100);
-                    }
                     message.className = 'message error';
-                    message.textContent = '❌ ' + errorMsg;
+                    message.textContent = '❌ Server error: ' + response.status;
                     return;
                 }
 
                 const data = await response.json();
-                console.log('📊 Data:', data);
 
                 if (data.error) {
                     message.className = 'message error';
                     message.textContent = '❌ ' + data.error;
-                    if (data.detail) message.textContent += ' - ' + data.detail;
                     return;
                 }
 
@@ -270,7 +264,6 @@
                     message.textContent = '✅ Data berhasil diambil! ID: ' + data.data.id;
                 }
             } catch (error) {
-                console.error('❌ Error:', error);
                 message.className = 'message error';
                 message.textContent = '❌ Error: ' + error.message;
             } finally {
@@ -375,8 +368,6 @@
             for (let i = 0; i < posts.length; i++) {
                 const p = posts[i];
                 try {
-                    console.log(`📤 Updating post ${i+1}/${posts.length}:`, p.id);
-
                     const response = await fetch('/api/update-post', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -397,25 +388,17 @@
                     });
 
                     if (!response.ok) {
-                        const text = await response.text();
                         failed++;
-                        console.error('❌ Failed:', response.status, text);
                         continue;
                     }
 
                     const data = await response.json();
-                    if (data.success) {
-                        success++;
-                    } else {
-                        failed++;
-                        console.error('❌ Failed:', data.error);
-                    }
+                    if (data.success) success++; else failed++;
 
                     message.className = 'message info';
                     message.textContent = `⏳ Progress: ${i+1}/${posts.length} (${success} sukses, ${failed} gagal)`;
                 } catch (error) {
                     failed++;
-                    console.error('❌ Error:', error);
                 }
             }
 
