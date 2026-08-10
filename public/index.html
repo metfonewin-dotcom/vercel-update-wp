@@ -80,7 +80,7 @@
             <h3>📝 Tambah Postingan</h3>
             <div class="form-group">
                 <label for="editUrl">URL Edit Post</label>
-                <input type="url" id="editUrl" placeholder="https://domain.com/wp-admin/post.php?post=123&action=edit">
+                <input type="url" id="editUrl" placeholder="https://domain.com/wp-admin/post.php?post=123&action=edit" value="https://faktajabar.org/wp-admin/post.php?post=1949&action=edit">
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="fetchPost()">📥 Fetch Data</button>
@@ -216,27 +216,34 @@
             editForm.classList.add('hidden');
 
             try {
+                console.log('📤 Sending to /api/fetch-post');
+                console.log('URL:', editUrl);
+
                 const response = await fetch('/api/fetch-post', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: editUrl, username, password: appPassword })
                 });
 
-                // ===== CEK RESPONSE =====
+                console.log('📊 Response status:', response.status);
+
                 if (!response.ok) {
                     const text = await response.text();
-                    let errorMsg = 'Server error: ' + response.status;
+                    let errorMsg = `Server error: ${response.status}`;
                     try {
                         const json = JSON.parse(text);
                         if (json.error) errorMsg = json.error;
                         if (json.detail) errorMsg += ' - ' + json.detail;
-                    } catch (e) {}
+                    } catch (e) {
+                        errorMsg += ' - ' + text.substring(0, 100);
+                    }
                     message.className = 'message error';
                     message.textContent = '❌ ' + errorMsg;
                     return;
                 }
 
                 const data = await response.json();
+                console.log('📊 Data:', data);
 
                 if (data.error) {
                     message.className = 'message error';
@@ -249,7 +256,6 @@
                     currentPost = data.data;
                     currentPostId = data.data.id;
 
-                    // Isi form
                     document.getElementById('postTitle').value = data.data.title || '';
                     document.getElementById('postContent').value = data.data.content || '';
                     document.getElementById('postStatus').value = data.data.status || 'draft';
@@ -259,22 +265,12 @@
                     document.getElementById('postCategories').value = '';
                     document.getElementById('postTags').value = '';
 
-                    // Tampilkan warning jika Yoast tidak aktif
-                    const warningEl = document.getElementById('yoastWarning');
-                    if (data.data.has_yoast === false) {
-                        warningEl.classList.remove('hidden');
-                    } else {
-                        warningEl.classList.add('hidden');
-                    }
-
                     editForm.classList.remove('hidden');
                     message.className = 'message success';
                     message.textContent = '✅ Data berhasil diambil! ID: ' + data.data.id;
-                    if (data.warning) {
-                        message.textContent += ' ⚠️ ' + data.warning;
-                    }
                 }
             } catch (error) {
+                console.error('❌ Error:', error);
                 message.className = 'message error';
                 message.textContent = '❌ Error: ' + error.message;
             } finally {
@@ -282,10 +278,21 @@
             }
         }
 
-        // ===== ADD POST TO LIST =====
+        // ===== ADD POST =====
         function addPostToList() {
-            if (!currentPost) { alert('Fetch data terlebih dahulu!'); return; }
-            if (posts.some(p => p.id === currentPostId)) { alert('Sudah ada!'); return; }
+            if (!currentPost) {
+                alert('Fetch data terlebih dahulu!');
+                return;
+            }
+            if (posts.some(p => p.id === currentPostId)) {
+                alert('Postingan sudah ada di daftar!');
+                return;
+            }
+
+            const siteUrl = document.getElementById('siteUrl').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const appPassword = document.getElementById('appPassword').value.trim();
+
             posts.push({
                 id: currentPostId,
                 title: document.getElementById('postTitle').value.trim() || currentPost.title,
@@ -294,54 +301,82 @@
                 categories: document.getElementById('postCategories').value.split(',').filter(Boolean).map(Number),
                 tags: document.getElementById('postTags').value.split(',').filter(Boolean).map(Number),
                 edit_url: document.getElementById('editUrl').value.trim(),
-                site_url: document.getElementById('siteUrl').value.trim(),
-                username: document.getElementById('username').value.trim(),
-                password: document.getElementById('appPassword').value.trim(),
+                site_url: siteUrl,
+                username: username,
+                password: appPassword,
                 yoast: {
                     title: document.getElementById('yoastTitle').value.trim(),
                     focuskw: document.getElementById('yoastFocuskw').value.trim(),
                     metadesc: document.getElementById('yoastMetadesc').value.trim()
                 }
             });
+
             savePosts();
             document.getElementById('editForm').classList.add('hidden');
             document.getElementById('editUrl').value = '';
             currentPost = null;
             currentPostId = null;
             document.getElementById('fetchMessage').className = 'message success';
-            document.getElementById('fetchMessage').textContent = '✅ Berhasil ditambahkan!';
+            document.getElementById('fetchMessage').textContent = '✅ Postingan berhasil ditambahkan!';
         }
 
         // ===== EDIT POST =====
         function editPost(i) {
             const p = posts[i];
-            const nt = prompt('Edit Judul:', p.title); if (nt !== null) p.title = nt.trim();
-            const ns = prompt('Edit Status (draft/publish):', p.status); if (ns !== null) p.status = ns.trim();
-            const nc = prompt('Edit Konten (HTML):', p.content); if (nc !== null) p.content = nc.trim();
-            const ny = prompt('Edit SEO Title:', p.yoast.title); if (ny !== null) p.yoast.title = ny.trim();
-            const nf = prompt('Edit Focus Keyword:', p.yoast.focuskw); if (nf !== null) p.yoast.focuskw = nf.trim();
-            const nm = prompt('Edit Meta Description:', p.yoast.metadesc); if (nm !== null) p.yoast.metadesc = nm.trim();
+            const nt = prompt('Edit Judul:', p.title);
+            if (nt !== null) p.title = nt.trim();
+            const ns = prompt('Edit Status (draft/publish):', p.status);
+            if (ns !== null) p.status = ns.trim();
+            const nc = prompt('Edit Konten (HTML):', p.content);
+            if (nc !== null) p.content = nc.trim();
+            const ny = prompt('Edit SEO Title:', p.yoast.title);
+            if (ny !== null) p.yoast.title = ny.trim();
+            const nf = prompt('Edit Focus Keyword:', p.yoast.focuskw);
+            if (nf !== null) p.yoast.focuskw = nf.trim();
+            const nm = prompt('Edit Meta Description:', p.yoast.metadesc);
+            if (nm !== null) p.yoast.metadesc = nm.trim();
             savePosts();
         }
 
         // ===== REMOVE POST =====
-        function removePost(i) { if (confirm('Hapus?')) { posts.splice(i, 1); savePosts(); } }
+        function removePost(i) {
+            if (confirm('Hapus postingan ini?')) {
+                posts.splice(i, 1);
+                savePosts();
+            }
+        }
 
         // ===== CLEAR ALL =====
-        function clearAllPosts() { if (posts.length && confirm('Hapus semua?')) { posts = []; savePosts(); } }
+        function clearAllPosts() {
+            if (posts.length === 0) return;
+            if (confirm('Hapus semua postingan?')) {
+                posts = [];
+                savePosts();
+            }
+        }
 
         // ===== UPDATE ALL =====
         async function updateAll() {
-            if (!posts.length) { alert('Tidak ada postingan!'); return; }
+            if (posts.length === 0) {
+                alert('Tidak ada postingan!');
+                return;
+            }
+
             const loading = document.getElementById('loadingUpdate');
             const message = document.getElementById('updateMessage');
+
             loading.classList.add('active');
             message.className = 'message';
             message.textContent = '';
-            let success = 0, failed = 0;
+
+            let success = 0;
+            let failed = 0;
+
             for (let i = 0; i < posts.length; i++) {
                 const p = posts[i];
                 try {
+                    console.log(`📤 Updating post ${i+1}/${posts.length}:`, p.id);
+
                     const response = await fetch('/api/update-post', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -364,24 +399,35 @@
                     if (!response.ok) {
                         const text = await response.text();
                         failed++;
-                        console.error('Gagal update:', response.status, text);
+                        console.error('❌ Failed:', response.status, text);
                         continue;
                     }
 
                     const data = await response.json();
-                    if (data.success) success++; else failed++;
+                    if (data.success) {
+                        success++;
+                    } else {
+                        failed++;
+                        console.error('❌ Failed:', data.error);
+                    }
 
                     message.className = 'message info';
-                    message.textContent = `⏳ ${i+1}/${posts.length} (${success} sukses, ${failed} gagal)`;
-                } catch (e) { failed++; }
+                    message.textContent = `⏳ Progress: ${i+1}/${posts.length} (${success} sukses, ${failed} gagal)`;
+                } catch (error) {
+                    failed++;
+                    console.error('❌ Error:', error);
+                }
             }
+
             message.className = 'message success';
             message.textContent = `✅ Selesai! ${success} sukses, ${failed} gagal dari ${posts.length} postingan.`;
             loading.classList.remove('active');
         }
 
         // ===== ENTER KEY =====
-        document.getElementById('editUrl').addEventListener('keydown', e => { if (e.key === 'Enter') fetchPost(); });
+        document.getElementById('editUrl').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') fetchPost();
+        });
 
         // ===== INIT =====
         loadPosts();
